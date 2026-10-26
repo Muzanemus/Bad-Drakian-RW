@@ -13,7 +13,17 @@ var lastVerbCat = '';
 var split_admin_tabs = false;
 
 function sortVerbs() {
+	var rollControls = ['Contested Roll', 'Roll Dice', 'Roll Stat'];
 	verbs.sort(function (a, b) {
+		if (a[0] === 'Emotes.Rolls' && b[0] === 'Emotes.Rolls') {
+			var aRank = rollControls.indexOf(a[1]);
+			var bRank = rollControls.indexOf(b[1]);
+			if (aRank !== bRank) {
+				if (aRank === -1) return 1;
+				if (bRank === -1) return -1;
+				return aRank - bRank;
+			}
+		}
 		return (a[0] + '\n' + a[1]).localeCompare(b[0] + '\n' + b[1]);
 	});
 	verbs.reverse();

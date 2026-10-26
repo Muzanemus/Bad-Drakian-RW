@@ -117,8 +117,13 @@
 		entries += list(list(statbrowser_verb_category(verb_path), verb_path.name, tab))
 	statbrowser_window.send_message("init_verbs", entries)
 
-/// Preserve native category names until presentation groups are assigned.
+/// Group rolls and admin sections; preserve other native tab assignments.
 /proc/statbrowser_verb_tab(procpath/verb_path)
+	switch(verb_path.category)
+		if("Emotes.Rolls")
+			return "Emotes"
+		if("-Admin-", "Prefs - Admin", "Admin.Special")
+			return "Admin"
 	return verb_path.category
 
 /// BYOND does not expose `set hidden` through procpath reflection.
@@ -127,9 +132,33 @@
 	var/static/list/hidden_settings = json_decode(file2text(file("html/statbrowser_hidden_verbs.json")))
 	return hidden_settings["[verb_path]"]
 
-/// Category payload used by the browser renderer.
+/// Presentation-only sections; native verb categories and visibility remain unchanged.
 /proc/statbrowser_verb_category(procpath/verb_path)
-	return verb_path.category
+	var/category = verb_path.category
+	if(category == "-Admin-")
+		return "Admin"
+	if(category == "Prefs - Admin")
+		return "Admin.Admin Prefs"
+	if(category != "Options" && category != "Preferences")
+		return category
+	var/static/list/sections = list(
+		/client/verb/change_music_vol = "Audio",
+		/client/verb/change_master_vol = "Audio",
+		/client/verb/change_ambience_vol = "Audio",
+		/client/verb/change_lobby_music_vol = "Audio",
+		/client/verb/volume_power_menu = "Audio",
+		/client/verb/mute_animal_emotes = "Audio",
+		/client/verb/toggle_lobby_music = "Audio",
+		/client/verb/stop_sounds_rogue = "Audio",
+		/client/verb/vocal_barks = "Audio",
+		/client/verb/masked_examine = "Examine",
+		/client/verb/toggle_topexamine = "Examine",
+		/client/verb/nsfw_examine_always = "Examine",
+		/client/verb/toggle_examine_blocks = "Examine",
+		/client/verb/toggle_tips = "Examine",
+		/client/verb/change_tip_delay = "Examine",
+	)
+	return "[category].[sections[verb_path] || "Options"]"
 
 /// Called by native Stat(); defer flushing until the entire subtype Stat() chain returns.
 /client/proc/begin_statbrowser_update()

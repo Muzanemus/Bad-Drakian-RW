@@ -181,7 +181,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 /mob/living/carbon/human/verb/roll_dice(expression as text|null)
 	set name = "Roll Dice"
 	set desc = "Throw dice, optionally against a difficulty and with modifiers."
-	set category = "Emotes.Rolling"
+	set category = "Emotes.Rolls"
 
 	if(!can_roll_dice())
 		return
@@ -373,7 +373,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 /mob/living/carbon/human/verb/emote_stat_roll()
 	set name = "Roll Stat"
 	set desc = "Roll one of your stats with traits taken into account."
-	set category = "Emotes.Rolling"
+	set category = "Emotes.Rolls"
 
 	if(!can_roll_dice())
 		return
@@ -428,7 +428,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 /// Preserved so `*str`/`*strength` keep a dedicated command-panel verb, same as every other stat roll.
 /mob/living/carbon/human/verb/emote_strength_roll()
 	set name = "Roll Strength"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_STRENGTH, intentional = TRUE)
 
@@ -467,7 +467,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_perception_roll()
 	set name = "Roll Perception"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_PERCEPTION, intentional = TRUE)
 
@@ -504,7 +504,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_intelligence_roll()
 	set name = "Roll Intelligence"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_INTELLIGENCE, intentional = TRUE)
 
@@ -541,7 +541,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_constitution_roll()
 	set name = "Roll Constitution"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_CONSTITUTION, intentional = TRUE)
 
@@ -577,7 +577,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_willpower_roll()
 	set name = "Roll Willpower"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_WILLPOWER, intentional = TRUE)
 
@@ -617,7 +617,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_speed_roll()
 	set name = "Roll Speed"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_SPEED, intentional = TRUE)
 
@@ -649,7 +649,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_fortune_roll()
 	set name = "Roll Fortune"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_FORTUNE, intentional = TRUE)
 
@@ -693,7 +693,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 
 /mob/living/carbon/human/verb/emote_charisma_roll()
 	set name = "Roll Charisma"
-	set category = "Emotes"
+	set category = "Emotes.Rolls"
 
 	emote(STAT_CHARISMA, intentional = TRUE)
 
@@ -790,7 +790,7 @@ GLOBAL_LIST_INIT(rollable_stats, list(
 /mob/living/carbon/human/verb/contested_roll()
 	set name = "Contested Roll"
 	set desc = "Pit one of your stats against another's."
-	set category = "Emotes.Rolling"
+	set category = "Emotes.Rolls"
 
 	if(!can_roll_dice())
 		return
