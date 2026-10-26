@@ -212,6 +212,17 @@ export async function DreamMaker(
     Juke.logger.info("Using defines:", defines.join(", "));
   }
 
+  // The browser verb panel needs hidden flags that BYOND cannot reflect.
+  // Generate from this compiler's source index using the same build defines.
+  if (path.basename(dmeFile) === "roguetown.dme") {
+    await Juke.exec(process.platform === "win32" ? "python" : "python3", [
+      "tools/statbrowser/hidden_verbs.py",
+      "--compiler", dmPath,
+      ...defines.flatMap((def) => ["--define", def]),
+      dmeFile,
+    ]);
+  }
+
   await runWithWarningChecks(dmPath, [
     ...defines.map((def) => `-D${def}`),
     dmeFile,

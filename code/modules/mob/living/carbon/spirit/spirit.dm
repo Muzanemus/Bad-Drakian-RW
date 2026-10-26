@@ -107,9 +107,9 @@
 
 /mob/living/carbon/spirit/Stat()
 	..()
-	if(statpanel("Status"))
-		stat(null, "Intent: [a_intent]")
-		stat(null, "Move Mode: [m_intent]")
+	if(statbrowser_panel("Status"))
+		statbrowser_entry(null, "Intent: [a_intent]")
+		statbrowser_entry(null, "Move Mode: [m_intent]")
 	return
 
 /mob/living/carbon/spirit/toggle_move_intent(mob/user) // Override so they can't run.

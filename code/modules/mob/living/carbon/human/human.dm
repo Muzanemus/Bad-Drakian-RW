@@ -215,11 +215,11 @@
 	if(mind)
 		var/datum/antagonist/vampire/VD = mind.has_antag_datum(/datum/antagonist/vampire)
 		if(VD)
-			if(statpanel("Stats"))
-				stat("Vitae:", bloodpool)
+			if(statbrowser_panel("Stats"))
+				statbrowser_entry("Vitae:", bloodpool)
 		if((mind.assigned_role == "Shepherd") || (mind.assigned_role == "Inquisitor"))
-			if(statpanel("Status"))
-				stat("Confessions sent: [GLOB.confessors.len]")
+			if(statbrowser_panel("Status"))
+				statbrowser_entry("Confessions sent: [GLOB.confessors.len]")
 
 	return //RTchange
 

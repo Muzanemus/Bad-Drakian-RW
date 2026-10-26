@@ -1671,6 +1671,7 @@
 #include "code\modules\client\client_colour.dm"
 #include "code\modules\client\client_defines.dm"
 #include "code\modules\client\client_procs.dm"
+#include "code\modules\client\statbrowser.dm"
 #include "code\modules\client\client_topic_lang.dm"
 #include "code\modules\client\darkmode.dm"
 #include "code\modules\client\economic_chronicle.dm"

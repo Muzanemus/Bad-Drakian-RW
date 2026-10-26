@@ -438,6 +438,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 			alert(mob, "You have logged in already with another key this round, please log out of this one NOW or risk being banned!")
 
 	tgui_panel.initialize()
+	initialize_statbrowser()
 
 	connection_time = world.time
 	connection_realtime = world.realtime
@@ -642,6 +643,12 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 
 /client/Destroy()
 	. = ..() //Even though we're going to be hard deleted there are still some things that want to know the destroy is happening
+	if(statbrowser_window)
+		statbrowser_window.unsubscribe(src)
+		statbrowser_window.close()
+		statbrowser_window.client = null
+		tgui_windows -= "statbrowser"
+		QDEL_NULL(statbrowser_window)
 	QDEL_NULL(droning_sound)
 	last_droning_sound = null
 	if(mob)

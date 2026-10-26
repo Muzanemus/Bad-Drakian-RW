@@ -93,7 +93,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 /datum/admin_help_tickets/proc/stat_entry()
 	SHOULD_CALL_PARENT(TRUE)
 	var/label = "Open Ticket Manager ([active_tickets.len] active)"
-	stat(null, astatclick.update(label))
+	statbrowser_entry(null, astatclick.update(label))
 
 //Reassociate still open ticket if one exists
 /datum/admin_help_tickets/proc/ClientLogin(client/C)

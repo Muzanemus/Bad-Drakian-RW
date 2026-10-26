@@ -253,7 +253,7 @@
 	if (can_fire)
 		title = "\[[state_letter()]][title]"
 
-	stat(title, statclick.update(msg))
+	statbrowser_entry(title, statclick.update(msg))
 
 /datum/controller/subsystem/proc/state_letter()
 	switch (state)
