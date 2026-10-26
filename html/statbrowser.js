@@ -69,7 +69,23 @@ function draw_native() {
 	statcontentdiv.textContent = '';
 	(nativeRows[current_tab] || []).forEach(function (row) {
 		var line = document.createElement('div');
-		if (row[0]) line.appendChild(document.createTextNode(row[0]));
+		if (row[0]) {
+			// Ochre's draw_stats(): style the label, preserving the value as text.
+			var colon = current_tab === 'Stats' ? row[0].indexOf(':') : -1;
+			if (colon === -1) {
+				line.appendChild(document.createTextNode(row[0]));
+			} else {
+				var statLabel = document.createElement('span');
+				statLabel.className =
+					'stat-label stat-label-' +
+					row[0].slice(0, colon).trim().toLowerCase();
+				statLabel.textContent = row[0].slice(0, colon + 1);
+				line.appendChild(statLabel);
+				line.appendChild(
+					document.createTextNode(row[0].slice(colon + 1)),
+				);
+			}
+		}
 		if (row[0] && row[1]) line.appendChild(document.createTextNode(' '));
 		var label = row[1] || (row[2] ? row[0] : '');
 		if (row[2]) {
