@@ -5,13 +5,15 @@
 /datum/antagonist/werewolf/proc/grant_curse_powers()
 	if(!owner?.current || length(curse_spells))
 		return
-	var/list/powers = is_moonkissed ? list(/obj/effect/proc_holder/spell/self/moonkissed) : list(/obj/effect/proc_holder/spell/self/werewolf_form)
+	var/list/powers = is_moonkissed ? list(/obj/effect/proc_holder/spell/self/moonkissed) : list(/obj/effect/proc_holder/spell/self/werewolf_form, /obj/effect/proc_holder/spell/self/moon_journal)
 	for(var/power in powers)
 		var/obj/effect/proc_holder/spell/spell = new power
 		curse_spells += spell
 		owner.AddSpell(spell, owner.current)
 	bind_curse_body(owner.current)
 	owner.current.grant_language(/datum/language/beast)
+	if(!is_moonkissed)
+		setup_contracts()
 
 /datum/antagonist/werewolf/on_body_transfer(mob/living/old_body, mob/living/new_body)
 	. = ..()
@@ -40,6 +42,10 @@
 				qdel(beast)
 	if(moonkissed_shifted)
 		unshift_moonkissed(old_body)
+	sync_moon_writs(new_body)
+	if(contract_party)
+		old_body?.verbs -= /mob/living/proc/review_patron_contract
+		new_body?.verbs |= /mob/living/proc/review_patron_contract
 	bind_curse_body(new_body)
 
 /datum/antagonist/werewolf/proc/bind_curse_body(mob/living/body)
@@ -49,6 +55,7 @@
 	if(!is_moonkissed && body)
 		RegisterSignal(body, COMSIG_MOB_APPLY_DAMGE, PROC_REF(on_curse_damage), override = TRUE)
 		RegisterSignal(body, COMSIG_MOB_ADD_STRESS, PROC_REF(on_curse_stress), override = TRUE)
+		RegisterSignal(body, COMSIG_LIVING_COMBAT_KILL, PROC_REF(on_werewolf_kill), override = TRUE)
 
 /datum/antagonist/werewolf/proc/on_curse_damage(mob/living/source, damage, damage_type)
 	SIGNAL_HANDLER
@@ -114,6 +121,12 @@
 		qdel(spell)
 	curse_spells.Cut()
 	remove_beast_powers(body)
+	teardown_contracts()
+	for(var/obj/item/quest_writ/writ as anything in moon_writs.Copy())
+		if(writ.assigned_quest)
+			qdel(writ.assigned_quest)
+		qdel(writ)
+	moon_writs.Cut()
 	cleanup_lair()
 	active_body_ref = null
 

@@ -512,6 +512,8 @@
 		return
 	log_combat(user, effective_target, "Came inside the target")
 	deadite_sex_infect_attempt(user, effective_target)
+	var/datum/antagonist/werewolf/wolf = user.mind?.has_antag_datum(/datum/antagonist/werewolf)
+	wolf?.record_breed_target(effective_target)
 	if(oral)
 		playsound(user, pick(list('sound/misc/mat/mouthend (1).ogg','sound/misc/mat/mouthend (2).ogg')), 100, FALSE, ignore_walls = FALSE)
 	else

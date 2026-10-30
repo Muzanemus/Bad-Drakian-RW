@@ -97,6 +97,10 @@ GLOBAL_LIST_EMPTY(last_words)
 
 /mob/living/death(gibbed, nocutscene = FALSE)
 	var/was_dead_before = stat == DEAD
+	if(!was_dead_before && lastattacker_weakref)
+		var/mob/living/attacker = lastattacker_weakref.resolve()
+		if(attacker && attacker != src)
+			SEND_SIGNAL(attacker, COMSIG_LIVING_COMBAT_KILL, src)
 	stat = DEAD
 	unset_machine()
 	timeofdeath = world.time

@@ -232,6 +232,7 @@
 	victim.forceMove(pit_entry)
 	victim.werewolf_pit_ref = WEAKREF(src)
 	captives[WEAKREF(victim)] = world.time + 10 MINUTES
+	W.record_trapped_target(victim)
 	pit_ready_at = world.time + 2 MINUTES
 	log_combat(user, victim, "placed in werewolf moon pit")
 	return TRUE

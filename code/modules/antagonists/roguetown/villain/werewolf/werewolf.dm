@@ -69,11 +69,18 @@
 	objectives -= O
 
 /datum/antagonist/werewolf/proc/forge_werewolf_objectives()
-	if(!(locate(/datum/objective/escape) in objectives))
-		var/datum/objective/werewolf/escape_objective = new
-		escape_objective.owner = owner
-		add_objective(escape_objective)
-		return
+	var/list/paths
+	if(is_moonkissed)
+		paths = list(/datum/objective/werewolf/survive, /datum/objective/werewolf/pack_elder, /datum/objective/werewolf_counter/embrace_gift)
+	else
+		paths = list(/datum/objective/werewolf/survive, /datum/objective/werewolf_counter/hunt, /datum/objective/werewolf_counter/slay, /datum/objective/werewolf_counter/convert, /datum/objective/werewolf_counter/trap, /datum/objective/werewolf_counter/contracts)
+		if(owner.current?.getorganslot(ORGAN_SLOT_TESTICLES))
+			paths += /datum/objective/werewolf_counter/breed
+	for(var/path in paths)
+		var/datum/objective/objective = new path
+		objective.owner = owner
+		objectives += objective
+	refresh_werewolf_objectives()
 
 /datum/antagonist/werewolf/greet()
 	to_chat(owner.current, span_userdanger("Since a bite long, long ago, Dendor's Madness has swelled within me. Before the Moonlight, I will sate my hallowed Lust."))
@@ -168,6 +175,7 @@
 		return
 	if(!werewolf_check())
 		return
+	source_werewolf.record_conversion_target(src)
 	to_chat(src, span_userdanger("The mooncurse takes root within me. I am Moonkissed."))
 	to_chat(source, span_notice("[src] accepts the verevolf's curse."))
 	log_combat(source, src, "converted into a verevolf through a voluntary bite")

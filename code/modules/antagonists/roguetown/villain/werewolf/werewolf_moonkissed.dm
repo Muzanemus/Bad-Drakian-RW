@@ -80,6 +80,7 @@
 	H.AddSpell(moonkissed_howl)
 	playsound(H, 'sound/vo/mobs/wwolf/wolftalk1.ogg', 75, TRUE)
 	H.update_body_parts(TRUE)
+	refresh_werewolf_objectives()
 	to_chat(H, span_notice("The moon's kiss surges through me. Wolfish ears and a tail awaken."))
 	return TRUE
 
