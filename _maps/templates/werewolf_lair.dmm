@@ -1,0 +1,217 @@
+//MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
+"a" = (
+/turf/closed/mineral/rogue/bedrock,
+/area/werewolf_den)
+"b" = (
+/turf/open/floor/rogue/dirt/road,
+/area/werewolf_den)
+"c" = (
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"d" = (
+/obj/structure/trap/bogtrap/kneestingers,
+/turf/closed/wall/mineral/rogue/stone/moss,
+/area/werewolf_den)
+"e" = (
+/turf/closed/wall/mineral/rogue/stone/moss,
+/area/werewolf_den)
+"g" = (
+/obj/structure/flora/tinymushrooms,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"i" = (
+/obj/structure/werewolf_moon_ledger,
+/turf/open/floor/rogue/cobble,
+/area/werewolf_den)
+"p" = (
+/obj/structure/flora/mushroomcluster,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"v" = (
+/obj/structure/flora/rock/pile,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"x" = (
+/obj/structure/bed/rogue/shit,
+/turf/open/floor/rogue/dirt/road,
+/area/werewolf_den)
+"z" = (
+/turf/open/floor/rogue/cobble,
+/area/werewolf_den)
+"C" = (
+/obj/structure/flora/tinymushrooms,
+/obj/structure/werewolf_moon_anchor,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"H" = (
+/obj/structure/flora/rock/pile,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"J" = (
+/obj/effect/landmark/werewolf_drop,
+/obj/effect/landmark/werewolf_entry,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"Q" = (
+/obj/structure/flora/mushroomcluster,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"R" = (
+/obj/machinery/light/rogue/firebowl/stump,
+/turf/open/floor/rogue/dirt/road,
+/area/werewolf_den)
+"S" = (
+/obj/structure/flora/shroomstump,
+/turf/open/floor/rogue/dirt/road,
+/area/werewolf_den)
+"V" = (
+/obj/structure/bed/rogue/shit,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"W" = (
+/obj/effect/landmark/werewolf_exit,
+/turf/closed/mineral/rogue/bedrock,
+/area/werewolf_den)
+"X" = (
+/obj/structure/flora/tinymushrooms,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den)
+"Y" = (
+/obj/structure/werewolf_moon_pit,
+/turf/open/floor/rogue/cobble,
+/area/werewolf_den)
+"Z" = (
+/obj/structure/table/wood,
+/turf/open/floor/rogue/dirt/road,
+/area/werewolf_den)
+
+(1,1,1) = {"
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+"}
+(2,1,1) = {"
+a
+e
+d
+e
+X
+c
+c
+g
+d
+e
+a
+"}
+(3,1,1) = {"
+a
+e
+C
+z
+c
+R
+c
+c
+v
+d
+a
+"}
+(4,1,1) = {"
+a
+e
+z
+i
+Y
+b
+b
+b
+c
+c
+a
+"}
+(5,1,1) = {"
+a
+V
+c
+z
+c
+b
+b
+b
+b
+c
+a
+"}
+(6,1,1) = {"
+a
+d
+b
+b
+b
+b
+b
+b
+b
+J
+W
+"}
+(7,1,1) = {"
+a
+V
+c
+Z
+b
+x
+b
+S
+c
+v
+a
+"}
+(8,1,1) = {"
+a
+e
+d
+Q
+c
+c
+Z
+c
+p
+e
+a
+"}
+(9,1,1) = {"
+a
+e
+e
+d
+H
+e
+g
+e
+d
+e
+a
+"}
+(10,1,1) = {"
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+"}

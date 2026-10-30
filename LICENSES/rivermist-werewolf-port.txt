@@ -1,0 +1,19 @@
+Rivermist Hollow werewolf port
+
+Source: https://github.com/sheetofseaweed/Rivermist-Hollow-Vanderlin
+Revision: 8dba961e768ecf8b9cbbc7b8199372f6a9fead96
+Copyright: the Rivermist Hollow and upstream contributors.
+
+Adapted gameplay code remains under the repository's GNU AGPL version 3.
+Source paths and attribution are retained in the adapted files.
+
+The layouts in _maps/templates/werewolf_lair.dmm and werewolf_pit.dmm
+were adapted from _maps/templates/pockets/pocket_werewolf_lair.dmm and
+pocket_werewolf_lair_trap.dmm in the source revision above. Object, turf,
+and area paths were replaced with Bad Drakian equivalents and native
+reservation entry/exit markers. The adapted layouts retain the source
+asset license: Creative Commons Attribution-ShareAlike 3.0 Unported.
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Existing Bad Drakian sprites and sounds are reused. No donor sound or
+sprite files are included in this port.

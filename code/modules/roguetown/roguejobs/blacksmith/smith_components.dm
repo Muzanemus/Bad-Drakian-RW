@@ -100,6 +100,9 @@
 	var/moveup = 1
 	var/proab = 0 // Probability to not spoil the bar
 	var/skill_level = user.get_skill_level(current_recipe.appro_skill)
+	if(skill_level < current_recipe.minimum_smith_skill)
+		to_chat(user, span_warning("This recipe requires [SSskills.level_names_plain[current_recipe.minimum_smith_skill]] skill."))
+		return FALSE
 	if(skill_level > current_recipe.smith_skill_level)
 		current_recipe.smith_skill_level = skill_level
 

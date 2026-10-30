@@ -78,7 +78,7 @@
 	return TRUE
 
 /datum/antagonist/werewolf/proc/grant_beast_powers(mob/living/carbon/human/body)
-	var/list/powers = list(/obj/effect/proc_holder/spell/self/howl/moonbound, /obj/effect/proc_holder/spell/self/claws/moonbound, /obj/effect/proc_holder/spell/invoked/werewolf/woundlick, /obj/effect/proc_holder/spell/self/terrifying_howl, /obj/effect/proc_holder/spell/invoked/werewolf/lunge, /obj/effect/proc_holder/spell/invoked/werewolf/throw_target, /obj/effect/proc_holder/spell/self/keen_nose, /obj/effect/proc_holder/spell/invoked/voluntary_bite)
+	var/list/powers = list(/obj/effect/proc_holder/spell/self/howl/moonbound, /obj/effect/proc_holder/spell/self/claws/moonbound, /obj/effect/proc_holder/spell/invoked/werewolf/woundlick, /obj/effect/proc_holder/spell/self/terrifying_howl, /obj/effect/proc_holder/spell/invoked/werewolf/lunge, /obj/effect/proc_holder/spell/invoked/werewolf/throw_target, /obj/effect/proc_holder/spell/self/keen_nose, /obj/effect/proc_holder/spell/invoked/voluntary_bite, /obj/effect/proc_holder/spell/invoked/werewolf/dig_lair)
 	for(var/power in powers)
 		var/obj/effect/proc_holder/spell/spell = new power
 		beast_spells += spell
@@ -114,6 +114,7 @@
 		qdel(spell)
 	curse_spells.Cut()
 	remove_beast_powers(body)
+	cleanup_lair()
 	active_body_ref = null
 
 /datum/antagonist/werewolf/Destroy()
@@ -149,3 +150,32 @@
 
 /datum/status_effect/debuff/werewolf_silver_bane/proc/end_overwhelm()
 	qdel(src)
+
+/obj/item/clothing/neck/roguetown/moonshackle
+	name = "moonshackle collar"
+	desc = "A heavy silver collar engraved to keep the beast bound in mortal flesh."
+	icon = 'icons/roguetown/clothing/neck.dmi'
+	mob_overlay_icon = 'icons/roguetown/clothing/onmob/neck.dmi'
+	icon_state = "feldcollar"
+	item_state = "feldcollar"
+	sellprice = 180
+	smeltresult = /obj/item/ingot/silver
+	max_integrity = 300
+
+/obj/item/clothing/neck/roguetown/moonshackle/equipped(mob/living/user, slot)
+	. = ..()
+	if(slot == SLOT_NECK)
+		ADD_TRAIT(user, TRAIT_WEREWOLF_TRANSFORMATION_SUPPRESSED, REF(src))
+
+/obj/item/clothing/neck/roguetown/moonshackle/dropped(mob/user)
+	REMOVE_TRAIT(user, TRAIT_WEREWOLF_TRANSFORMATION_SUPPRESSED, REF(src))
+	return ..()
+
+/datum/anvil_recipe/armor/silver/moonshackle
+	name = "Moonshackle collar (+1 Silver, Diamond, Ruby, Sapphire)"
+	req_bar = /obj/item/ingot/silver
+	additional_items = list(/obj/item/ingot/silver, /obj/item/roguegem/diamond, /obj/item/roguegem/ruby, /obj/item/roguegem/blue)
+	created_item = /obj/item/clothing/neck/roguetown/moonshackle
+	appro_skill = /datum/skill/craft/blacksmithing
+	craftdiff = SKILL_LEVEL_LEGENDARY
+	minimum_smith_skill = SKILL_LEVEL_LEGENDARY

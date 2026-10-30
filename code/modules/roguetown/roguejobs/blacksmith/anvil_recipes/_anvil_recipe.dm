@@ -13,6 +13,7 @@
 	var/atom/movable/created_item
 	var/createditem_num = 1 // How many units to make.
 	var/craftdiff = 0
+	var/minimum_smith_skill = 0 // Hard minimum, independent of difficulty.
 	var/needed_item
 	var/needed_item_text
 	var/quality_mod = 0

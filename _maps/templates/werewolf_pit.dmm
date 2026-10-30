@@ -1,0 +1,70 @@
+//MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
+"a" = (
+/turf/closed/mineral/rogue/bedrock,
+/area/werewolf_den/pit)
+"b" = (
+/obj/effect/decal/cleanable/blood,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den/pit)
+"c" = (
+/obj/effect/landmark/werewolf_drop,
+/obj/structure/bed/rogue/shit,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den/pit)
+"d" = (
+/obj/effect/landmark/werewolf_entry,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den/pit)
+"g" = (
+/obj/effect/decal/cleanable/blood,
+/obj/structure/flora/rock/pile,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den/pit)
+"n" = (
+/obj/structure/trap/bogtrap/kneestingers,
+/turf/closed/mineral/rogue/bedrock,
+/area/werewolf_den/pit)
+"H" = (
+/obj/effect/landmark/werewolf_exit,
+/turf/closed/mineral/rogue/bedrock,
+/area/werewolf_den/pit)
+"O" = (
+/mob/living/simple_animal/hostile/rogue/werewolf,
+/turf/open/floor/rogue/naturalstone,
+/area/werewolf_den/pit)
+
+(1,1,1) = {"
+a
+a
+a
+a
+a
+"}
+(2,1,1) = {"
+a
+O
+b
+O
+a
+"}
+(3,1,1) = {"
+n
+g
+c
+d
+H
+"}
+(4,1,1) = {"
+n
+O
+b
+O
+a
+"}
+(5,1,1) = {"
+a
+a
+a
+n
+a
+"}

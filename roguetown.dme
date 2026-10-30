@@ -1547,6 +1547,8 @@
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_rage.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_powers.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_moonkissed.dm"
+#include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_lair.dm"
+#include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_journal.dm"
 #include "code\modules\antagonists\roguetown\villain\zombie\remove_rot.dm"
 #include "code\modules\antagonists\roguetown\villain\zombie\zombie.dm"
 #include "code\modules\antagonists\roguetown\villain\zombie\zombie_disease.dm"

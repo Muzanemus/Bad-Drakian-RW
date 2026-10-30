@@ -198,6 +198,8 @@
 		to_chat(user, span_notice("I smell [scent] to the [dir2text(get_dir(user, target))], [get_dist(user, target)] paces away."))
 	if(!found)
 		to_chat(user, span_notice("No creatures are nearby, save myself."))
+	var/datum/antagonist/werewolf/W = user.mind?.has_antag_datum(/datum/antagonist/werewolf)
+	W?.sniff_lair(user)
 	return TRUE
 
 /obj/effect/proc_holder/spell/invoked/werewolf/woundlick
