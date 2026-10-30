@@ -14,7 +14,7 @@
 	base_antags = 1
 	maximum_antags = 2
 	min_players = 25
-	weight = 1
+	weight = 0 // Full wolves are selected through the Werewolf job instead.
 
 	earliest_start = 0 SECONDS
 

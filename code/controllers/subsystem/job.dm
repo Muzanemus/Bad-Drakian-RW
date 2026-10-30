@@ -721,7 +721,7 @@ SUBSYSTEM_DEF(job)
 
 	//If we joined at roundstart we should be positioned at our workstation
 	if(!joined_late)
-		var/spawn_rank = rank
+		var/spawn_rank = job?.roundstart_spawn_rank || rank
 		var/handled_resident_spawn = FALSE
 		if(istype(H, /mob/living/carbon/human))
 			if(should_use_towner_spawn(H, M?.client))

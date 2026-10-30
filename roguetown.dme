@@ -1550,6 +1550,7 @@
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_lair.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_journal.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_objectives.dm"
+#include "code\modules\antagonists\roguetown\villain\werewolf\werewolf_job.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\contracts\antag_contract.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\contracts\contract_antag.dm"
 #include "code\modules\antagonists\roguetown\villain\werewolf\contracts\contract_goal.dm"

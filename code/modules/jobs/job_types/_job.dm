@@ -29,6 +29,7 @@
 
 	//How many players can spawn in as this job
 	var/spawn_positions = 0
+	var/roundstart_spawn_rank // Optional mapped spawn alias for jobs without dedicated landmarks.
 
 	//How many players have this job
 	var/current_positions = 0
