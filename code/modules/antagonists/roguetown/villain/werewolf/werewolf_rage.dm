@@ -5,7 +5,7 @@
 /datum/antagonist/werewolf/proc/grant_curse_powers()
 	if(!owner?.current || length(curse_spells))
 		return
-	var/list/powers = is_moonkissed ? list() : list(/obj/effect/proc_holder/spell/self/werewolf_form)
+	var/list/powers = is_moonkissed ? list(/obj/effect/proc_holder/spell/self/moonkissed) : list(/obj/effect/proc_holder/spell/self/werewolf_form)
 	for(var/power in powers)
 		var/obj/effect/proc_holder/spell/spell = new power
 		curse_spells += spell
@@ -38,6 +38,8 @@
 			untransforming = FALSE
 			if(!beast.mind)
 				qdel(beast)
+	if(moonkissed_shifted)
+		unshift_moonkissed(old_body)
 	bind_curse_body(new_body)
 
 /datum/antagonist/werewolf/proc/bind_curse_body(mob/living/body)
@@ -76,7 +78,7 @@
 	return TRUE
 
 /datum/antagonist/werewolf/proc/grant_beast_powers(mob/living/carbon/human/body)
-	var/list/powers = list(/obj/effect/proc_holder/spell/self/howl, /obj/effect/proc_holder/spell/self/claws, /obj/effect/proc_holder/spell/targeted/woundlick, /obj/effect/proc_holder/spell/invoked/voluntary_bite)
+	var/list/powers = list(/obj/effect/proc_holder/spell/self/howl/moonbound, /obj/effect/proc_holder/spell/self/claws/moonbound, /obj/effect/proc_holder/spell/invoked/werewolf/woundlick, /obj/effect/proc_holder/spell/self/terrifying_howl, /obj/effect/proc_holder/spell/invoked/werewolf/lunge, /obj/effect/proc_holder/spell/invoked/werewolf/throw_target, /obj/effect/proc_holder/spell/self/keen_nose, /obj/effect/proc_holder/spell/invoked/voluntary_bite)
 	for(var/power in powers)
 		var/obj/effect/proc_holder/spell/spell = new power
 		beast_spells += spell
@@ -105,6 +107,8 @@
 		body.faction -= "wolves"
 		body.remove_language(/datum/language/beast)
 		UnregisterSignal(body, list(COMSIG_MOB_APPLY_DAMGE, COMSIG_MOB_ADD_STRESS, COMSIG_LIVING_COMBAT_KILL))
+		if(is_moonkissed)
+			unshift_moonkissed(body)
 	for(var/obj/effect/proc_holder/spell/spell as anything in curse_spells)
 		owner?.spell_list -= spell
 		qdel(spell)
