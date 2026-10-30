@@ -171,57 +171,20 @@
 	target.offer_werewolf_bite(user)
 	return TRUE
 
-/obj/effect/proc_holder/spell/invoked/shiftback
-	name = "Give In To Daylight"
-	desc = "Allows daylight to revert my verevolf form to normal."
+/obj/effect/proc_holder/spell/self/werewolf_form
+	name = "Toggle Transformation"
+	desc = "Switch between mortal and beast form. Each completed change requires five minutes to settle."
 	overlay_state = "tamebeast"
 	clothes_req = FALSE
 	human_req = FALSE
-	chargedrain = 0
-	chargetime = 5 SECONDS
-	invocation_type = "none"
 	antimagic_allowed = TRUE
 	ignore_cockblock = TRUE
-	recharge_time = 5 SECONDS
-	cooldown_min = 50
-	action_icon_state = "shapeshift"
+	recharge_time = 1 SECONDS
 
-/obj/effect/proc_holder/spell/invoked/shiftback/calculate_chargetime(mob/living/user)
-	return chargetime
-
-/obj/effect/proc_holder/spell/invoked/shiftback/cast(list/targets, mob/user)
-	if(!user)
-		return
-	if(!user.mind)
-		return // bad
-	var/datum/antagonist/werewolf/antag_data = user.mind.has_antag_datum(/datum/antagonist/werewolf)
-	if(!antag_data)
-		to_chat(user, span_warning("I lacketh thine connectte to the varvolf curse!"))
-		return // whatever
-	if(!antag_data.transformed)
-		to_chat(user, span_warning("I possess my mundane form already, and I cannot force the curse myself. I must wait for night."))
-		return
-	
-	// can go one of a few ways, while wolf:
-	// at night, where theyd need to wait for day to take effect
-	// at day, where it'd take effect soon
-	// at day, while untransforming, to cancel the transformation
-	// off to on, easy
-	// on to off, extra stuff i guess?
-	var/untfing = antag_data.untransforming
-	var/is_day = GLOB.tod != "night"
-	antag_data.ready_to_untransform = !antag_data.ready_to_untransform
-
-	if(antag_data.ready_to_untransform) // was off, now on
-		if(is_day)
-			to_chat(user, span_notice("I release my hold on this cursed form, and allow daytime to return me to mundanity."))
-		else
-			to_chat(user, span_notice("I release my hold on this cursed form, and when day breaks it shall return me to mundanity."))
-	else // was on, turn off
-		if(untfing) // will end up aborting the tf
-			to_chat(user, span_notice("I fight back against the daylight, returning my hold on this cursed form.")) // should be dramatic enough
-		else
-			to_chat(user, span_notice("I steel my resolve to maintain my cursed form, daytime shall not rob me of my claws and fur.")) // should be dramatic enough
-		antag_data.abort_untransformation(user) // either works
+/obj/effect/proc_holder/spell/self/werewolf_form/cast(list/targets, mob/living/carbon/human/user)
+	var/datum/antagonist/werewolf/W = user.mind?.has_antag_datum(/datum/antagonist/werewolf)
+	if(!W || !W.can_change_form(user, TRUE))
+		revert_cast(user)
+		return FALSE
+	W.begin_form_change(user)
 	return TRUE
-

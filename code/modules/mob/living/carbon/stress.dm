@@ -47,6 +47,7 @@ GLOBAL_LIST_INIT(stress_messages, world.file2list("strings/rt/stress_messages.tx
 	if(event.stacks >= event.max_stacks)
 		return event
 	event.stacks++
+	SEND_SIGNAL(src, COMSIG_MOB_ADD_STRESS, event)
 	return event
 
 /mob/living/carbon/remove_stress(event_type)

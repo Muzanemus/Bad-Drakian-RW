@@ -1,165 +1,131 @@
+// Adapted from Rivermist Hollow (AGPL-3.0), revision 8dba961e768e.
+// https://github.com/sheetofseaweed/Rivermist-Hollow-Vanderlin/tree/8dba961e768ecf8b9cbbc7b8199372f6a9fead96
+
 /datum/antagonist/werewolf/on_life(mob/user)
-	try_werewolf_auto_tf(user)
-
-/datum/antagonist/werewolf/proc/can_transform(mob/living/carbon/human/user)
-	if(!ishuman(user)) 
-		return FALSE
 	var/mob/living/carbon/human/H = user
-	if(H.stat == DEAD) 
-		return FALSE
-	if(H.advsetup) 
-		return FALSE
-	if(HAS_TRAIT(H, TRAIT_SILVER_BLESSED)) 
+	if(!istype(H) || H.stat == DEAD || H.advsetup || owner?.current != H)
+		return
+	// Life and DeadLife can both dispatch antagonist ticks; use one clock per curse.
+	if(world.time < next_curse_tick)
+		return
+	next_curse_tick = world.time + 2 SECONDS
+	if(!is_moonkissed)
+		update_rage(transformed ? -5.5 : -0.5)
+		if(transformed && rage >= 50 && !H.IsParalyzed() && H.get_blood_volume() > BLOOD_VOLUME_SURVIVE)
+			for(var/obj/item/bodypart/part as anything in H.bodyparts)
+				for(var/datum/wound/wound as anything in part.wounds)
+					wound.heal_wound(1.2)
+		update_moon_pressure(H)
+
+/datum/antagonist/werewolf/proc/update_moon_pressure(mob/living/carbon/human/H)
+	if(last_seen_tod != GLOB.tod)
+		var/previous = last_seen_tod
+		last_seen_tod = GLOB.tod
+		if(!isnull(previous) && GLOB.tod == "night")
+			if(transformed || transformed_since_last_nightfall)
+				reset_moon_pressure()
+			else
+				nights_without_transformation = min(nights_without_transformation + 1, 3)
+				H.remove_stress_list(list(/datum/stressevent/werewolf_restless_1, /datum/stressevent/werewolf_restless_2, /datum/stressevent/werewolf_restless_3))
+				switch(nights_without_transformation)
+					if(1)
+						H.add_stress(/datum/stressevent/werewolf_restless_1)
+					if(2)
+						H.add_stress(/datum/stressevent/werewolf_restless_2)
+					if(3)
+						H.add_stress(/datum/stressevent/werewolf_restless_3)
+						forced_transformation_pending = TRUE
+				to_chat(H, span_warning("The beast has been denied for [nights_without_transformation] nightfalls."))
+			transformed_since_last_nightfall = FALSE
+	if(forced_transformation_pending && can_change_form(H))
+		begin_form_change(H, TRUE)
+
+/datum/antagonist/werewolf/proc/reset_moon_pressure()
+	nights_without_transformation = 0
+	forced_transformation_pending = FALSE
+	var/mob/living/carbon/human/H = owner?.current
+	if(transformed)
+		H = H?.stored_mob
+	H?.remove_stress_list(list(/datum/stressevent/werewolf_restless_1, /datum/stressevent/werewolf_restless_2, /datum/stressevent/werewolf_restless_3))
+
+/datum/antagonist/werewolf/proc/can_change_form(mob/living/carbon/human/H, feedback = FALSE)
+	var/reason
+	if(QDELETED(H) || owner?.current != H || H.stat != CONSCIOUS || H.advsetup)
+		reason = "I am in no condition to command the beast."
+	else if(is_moonkissed)
+		reason = "My shallow curse cannot take a beast's form."
+	else if(transforming || untransforming)
+		reason = "My body is already changing."
+	else if(world.time < form_change_ready_at)
+		reason = "My form is still settling for [DisplayTimeText(form_change_ready_at - world.time)]."
+	else if(!transformed && (HAS_TRAIT(H, TRAIT_SILVER_BLESSED) || HAS_TRAIT(H, TRAIT_WEREWOLF_TRANSFORMATION_SUPPRESSED)))
+		reason = "Silver or a holy blessing keeps the beast caged."
+	else if(H.notransform || (!transformed && H.is_shapeshift_shell()))
+		reason = "Another transformation prevents the change."
+	if(reason)
+		if(feedback && !QDELETED(H))
+			to_chat(H, span_warning(reason))
 		return FALSE
 	return TRUE
 
-// automatic fire-and-do-whatever-should-do-thing thing
-/datum/antagonist/werewolf/proc/try_werewolf_auto_tf(mob/living/carbon/human/user)
-	if(!can_transform(user))
-		return
-
-	if(transformed)
-		if(time_is_day_under_daylight_day(user))
-			if(!is_unmagical_ungirl_untransforming(user))
-				start_the_untransformation(user)
-				return // the furry -> bigfurry pipeline is started
-			tick_unmagical_ungirl_untransformation(user)
-		else if(untransforming)
-			abort_untransformation(user)
+/datum/antagonist/werewolf/proc/begin_form_change(mob/living/carbon/human/H, forced = FALSE)
+	set waitfor = FALSE
+	if(!can_change_form(H, TRUE))
+		return FALSE
+	var/was_transformed = transformed
+	var/datum/mind/original_mind = owner
+	if(was_transformed)
+		untransforming = TRUE
 	else
-		if(time_is_right_under_moonlit_night(user))
-			if(!is_magical_girl_transforming(user))
-				start_the_transformation(user)
-				return // the bigfurry -> furry pipeline is started
-			tick_magical_girl_transformation(user)
-		else if(transforming)
-			abort_transformation(user)
-
-/datum/antagonist/werewolf/proc/time_is_day_under_daylight_day(mob/living/carbon/human/user)
-	if(!transformed)
+		transforming = TRUE
+	H.Stun(3.5 SECONDS, ignore_canstun = TRUE)
+	H.fullscreen_redflash("redflash3")
+	H.emote("scream", forced = TRUE)
+	sleep(1.5 SECONDS)
+	if(!QDELETED(H))
+		H.emote("scream", forced = TRUE)
+	sleep(1.5 SECONDS)
+	if(QDELETED(src))
 		return FALSE
-	if(GLOB.tod == "night")
-		return FALSE // define? very fine~
-	if(ready_to_untransform)
-		return TRUE // good!
-	if(!automatically_untransforms_in_daytime)
+	transforming = FALSE
+	untransforming = FALSE
+	if(QDELETED(H) || owner != original_mind || H.mind != owner || transformed != was_transformed || !can_change_form(H, TRUE))
 		return FALSE
+	if(was_transformed)
+		H.werewolf_untransform()
+	else
+		H.werewolf_transform()
 	return TRUE
 
-// Werewolf transforms at night AND under the sky
-/datum/antagonist/werewolf/proc/time_is_right_under_moonlit_night(mob/living/carbon/human/user)
-	if(transformed)
-		return FALSE
-	if(GLOB.tod != "night")
-		return FALSE
-	var/turf/here = user.loc
-	if(!isturf(here))
-		return FALSE // inside something, or user is a turf and their loc is an area. actually impossible, but something I have to keep reminding myself, about the whole turf.loc = area thing
-	if(!here.can_see_sky())
-		return FALSE
-	return TRUE
+/datum/antagonist/werewolf/proc/finish_form_change()
+	transforming = FALSE
+	untransforming = FALSE
+	form_change_ready_at = world.time + 5 MINUTES
+	transformed_since_last_nightfall = TRUE
+	reset_moon_pressure()
 
-/datum/antagonist/werewolf/proc/start_the_transformation(mob/living/carbon/human/user)
-	to_chat(user, span_userdanger("The moonlight scorns me... It is too late."))
-	owner.current.playsound_local(get_turf(owner.current), 'sound/music/wolfintro.ogg', 80, FALSE, pressure_affected = FALSE)
-	user.fullscreen_redflash("redflash3")
-	transforming = world.time // timer
-	tf_stage = 0
-
-/datum/antagonist/werewolf/proc/start_the_untransformation(mob/living/carbon/human/user)
-	untransforming = world.time // Start untransformation phase
-	tf_stage = 0
-
-/datum/antagonist/werewolf/proc/is_magical_girl_transforming(mob/living/carbon/human/user)
-	return transforming > 0
-
-/datum/antagonist/werewolf/proc/is_unmagical_ungirl_untransforming(mob/living/carbon/human/user)
-	return untransforming > 0
-
-/datum/antagonist/werewolf/proc/tick_magical_girl_transformation(mob/living/carbon/human/user)
-	if(transformed)
-		return
-	var/delta_t = world.time - transforming
-	switch(tf_stage)
-		if(0)
-			to_chat(user, span_warning("I feel sick..."))
-			tf_stage = 1
-		if(1) // stage 1
-			if(delta_t < 10 SECONDS)
-				return
-			user.emote("") // ??
-			to_chat(user, span_warning("I can feel my muscles aching, it feels HORRIBLE..."))
-			tf_stage = 2
-		if(2) // stage 2
-			if(delta_t < 25 SECONDS)
-				return
-			user.fullscreen_redflash("redflash3")
-			user.emote("agony", forced = TRUE)
-			to_chat(user, span_userdanger("UNIMAGINABLE PAIN!"))
-			user.Stun(30)
-			user.Knockdown(30)
-			tf_stage = 3
-		if(3) // stage 3, sailor star power make up
-			if(delta_t < 35 SECONDS)
-				return
-			user.werewolf_transform()
-			ready_to_untransform = FALSE // just in case
-			transforming = FALSE // its both a boolean AND a timer!
-			transformed = TRUE // Mark as transformed
-			tf_stage = 0 // all done!
-
-/datum/antagonist/werewolf/proc/tick_unmagical_ungirl_untransformation(mob/living/carbon/human/user)
-	if(!transformed)
-		return // already there
-	var/delta_t = world.time - untransforming
-	switch(tf_stage)
-		if(0)
-			to_chat(user, span_warning("My fur itches..."))
-			tf_stage = 1
-		if(1)
-			if(delta_t < 10 SECONDS)
-				return
-			user.fullscreen_redflash("redflash1")
-			to_chat(user, span_warning("Daylight shines around me... the curse begins to fade."))
-			tf_stage = 2
-		if(2)
-			if(delta_t < 30 SECONDS)
-				return
-			user.emote("rage", forced = TRUE)
-			user.werewolf_untransform()
-			ready_to_untransform = FALSE
-			transformed = FALSE
-			untransforming = FALSE // Reset untransforming phase
-			tf_stage = 0
-
-/datum/antagonist/werewolf/proc/abort_transformation(mob/living/carbon/human/user)
-	if(!transforming || transformed)
-		return // not wolfing, or already a wolf
-	transforming = 0
-	tf_stage = 0
-	to_chat(user, span_userdanger("I resist the moonlight's influence! My transformation has ceased!"))
-	user.Stun(10)
-	user.Knockdown(10)
-
-/datum/antagonist/werewolf/proc/abort_untransformation(mob/living/carbon/human/user)
-	if(!untransforming || !transformed)
-		return // not unwolfine, or already not a wolf
-	ready_to_untransform = FALSE
-	untransforming = 0
-	tf_stage = 0
-	to_chat(user, span_userdanger("I reject the daylight's power!"))
-	user.Stun(10)
-	user.Knockdown(10)
+/datum/stressevent/werewolf_restless_1
+	desc = "The beast is growing restless beneath my skin."
+	stressadd = 2
+/datum/stressevent/werewolf_restless_2
+	desc = "Denying the beast is becoming unbearable."
+	stressadd = 4
+/datum/stressevent/werewolf_restless_3
+	desc = "The beast is furious at being denied."
+	stressadd = 6
 
 /mob/living/carbon/human/species/werewolf/death(gibbed, nocutscene = FALSE)
 	werewolf_untransform(TRUE, gibbed)
 
 /mob/living/carbon/human/proc/werewolf_transform()
 	if(!mind)
-		log_runtime("NO MIND ON [src.name] WHEN TRANSFORMING")
+		return
 	Paralyze(1, ignore_canstun = TRUE)
-	for(var/obj/item/W in src)
-		dropItemToGround(W)
+	for(var/obj/item/item in get_equipped_items(FALSE))
+		if(istype(item, /obj/item/clothing) || istype(item, /obj/item/storage/belt))
+			item.take_damage(item.max_integrity * 0.15, sound_effect = FALSE)
+		else
+			dropItemToGround(item)
 	regenerate_icons()
 	icon = null
 	var/oldinv = invisibility
@@ -199,6 +165,7 @@
 	playsound(W.loc, pick('sound/combat/gib (1).ogg','sound/combat/gib (2).ogg'), 80, FALSE, 3)
 	W.spawn_gibs(FALSE)
 	src.forceMove(W)
+	notransform = TRUE
 
 	W.after_creation()
 	W.stored_language = new
@@ -208,8 +175,6 @@
 	W.cmode_music_override = cmode_music_override
 	W.cmode_music_override_name = cmode_music_override_name
 	mind.transfer_to(W)
-	skills?.known_skills = list()
-	skills?.skill_experience = list()
 	W.remove_all_languages()
 	W.grant_language(/datum/language/beast)
 
@@ -220,98 +185,89 @@
 	W.emote("rage")
 
 	if(getorganslot(ORGAN_SLOT_PENIS))
-		W.internal_organs_slot[ORGAN_SLOT_PENIS] = /obj/item/organ/penis/knotted/big
+		var/obj/item/organ/organ = new /obj/item/organ/penis/knotted/big
+		organ.Insert(W, TRUE)
 	if(getorganslot(ORGAN_SLOT_TESTICLES))
-		W.internal_organs_slot[ORGAN_SLOT_TESTICLES] = /obj/item/organ/testicles
+		var/obj/item/organ/organ = new /obj/item/organ/testicles
+		organ.Insert(W, TRUE)
 	if(getorganslot(ORGAN_SLOT_BREASTS))
-		W.internal_organs_slot[ORGAN_SLOT_BREASTS] = /obj/item/organ/breasts
+		var/obj/item/organ/organ = new /obj/item/organ/breasts
+		organ.Insert(W, TRUE)
 	if(getorganslot(ORGAN_SLOT_VAGINA))
-		W.internal_organs_slot[ORGAN_SLOT_VAGINA] = /obj/item/organ/vagina
+		var/obj/item/organ/organ = new /obj/item/organ/vagina
+		organ.Insert(W, TRUE)
 
-	W.adjust_skillrank(/datum/skill/combat/wrestling, 5, TRUE)
-	W.adjust_skillrank(/datum/skill/combat/unarmed, 5, TRUE)
-	W.adjust_skillrank(/datum/skill/misc/climbing, 6, TRUE)
-	W.adjust_skillrank(/datum/skill/misc/swimming, 5, TRUE)
+	W.adjust_skillrank(/datum/skill/combat/wrestling, max(0, 5 - W.get_skill_level(/datum/skill/combat/wrestling)), TRUE)
+	W.adjust_skillrank(/datum/skill/combat/unarmed, max(0, 5 - W.get_skill_level(/datum/skill/combat/unarmed)), TRUE)
+	W.adjust_skillrank(/datum/skill/misc/climbing, max(0, 6 - W.get_skill_level(/datum/skill/misc/climbing)), TRUE)
 
 	W.STASTR = 20
 	W.STACON = 20
 	W.STAWIL = 20
+	W.STAPER = 15
+	W.STASPD = 13
+	W.STAINT = 7
 
-	W.AddSpell(new /obj/effect/proc_holder/spell/self/howl)
-	W.AddSpell(new /obj/effect/proc_holder/spell/self/claws)
-	W.AddSpell(new /obj/effect/proc_holder/spell/targeted/woundlick)
-	W.AddSpell(new /obj/effect/proc_holder/spell/invoked/voluntary_bite)
-	W.AddSpell(new /obj/effect/proc_holder/spell/invoked/shiftback)
-
-	ADD_TRAIT(src, TRAIT_NOSLEEP, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_GRABIMMUNE, TRAIT_GENERIC) // THIS IS THE CORRECT PLACE FOR WEREWOLF TRAITS. GOD.
-	ADD_TRAIT(W, TRAIT_STRONGBITE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_ZJUMP, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_NOFALLDAMAGE1, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_INFINITE_STAMINA, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_BASHDOORS, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_SHOCKIMMUNE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_STEELHEARTED, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_BREADY, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_TOXIMMUNE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_ORGAN_EATER, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_NASTY_EATER, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_NOSTINK, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_CRITICAL_RESISTANCE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_IGNOREDAMAGESLOWDOWN, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_IGNORESLOWDOWN, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_HARDDISMEMBER, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_PIERCEIMMUNE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_SPELLCOCKBLOCK, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_LONGSTRIDER, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_STRENGTH_UNCAPPED, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_GRABIMMUNE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_DEATHBYSNUSNU, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_UNLYCKERABLE, TRAIT_GENERIC)
-	ADD_TRAIT(W, TRAIT_EXTREME_TEMPERATURE_IMMUNE, TRAIT_GENERIC)
+	if(Were)
+		Were.grant_beast_powers(W)
+		Were.finish_form_change()
+	ADD_TRAIT(src, TRAIT_NOSLEEP, REF(Were))
 
 	invisibility = oldinv
 
 /mob/living/carbon/human/proc/werewolf_untransform(dead,gibbed)
+	set waitfor = FALSE
 	if(!stored_mob)
 		return
 	if(!mind)
-		log_runtime("NO MIND ON [src.name] WHEN UNTRANSFORMING")
-	Paralyze(1, ignore_canstun = TRUE)
-	for(var/obj/item/W in src)
-		dropItemToGround(W)
+		return
 	icon = null
 	invisibility = INVISIBILITY_MAXIMUM
 
 	var/mob/living/carbon/human/W = stored_mob
 	stored_mob = null
-	REMOVE_TRAIT(W, TRAIT_NOSLEEP, TRAIT_GENERIC)
-	if(dead)
-		W.death(gibbed)
+	W.notransform = FALSE
+	var/datum/antagonist/werewolf/antag = mind?.has_antag_datum(/datum/antagonist/werewolf)
+	REMOVE_TRAIT(W, TRAIT_NOSLEEP, REF(antag))
+	if(antag)
+		antag.remove_beast_powers(src)
 
 	W.forceMove(get_turf(src))
 
 	REMOVE_TRAIT(W, TRAIT_NOMOOD, TRAIT_GENERIC)
 	REMOVE_TRAIT(W, TRAIT_SILVER_WEAK, TRAIT_GENERIC)
 
+	if(antag)
+		antag.transformed = FALSE
 	mind.transfer_to(W)
 
 	var/mob/living/carbon/human/species/werewolf/WA = src
 	W.remove_all_languages()
 	W.copy_known_languages_from(WA.stored_language)
-	skills?.known_skills = WA.stored_skills.Copy()
-	skills?.skill_experience = WA.stored_experience.Copy()
+	W.ensure_skills().known_skills = WA.stored_skills.Copy()
+	W.ensure_skills().skill_experience = WA.stored_experience.Copy()
 
-	W.RemoveSpell(new /obj/effect/proc_holder/spell/self/howl)
-	W.RemoveSpell(new /obj/effect/proc_holder/spell/self/claws)
-	W.RemoveSpell(new /obj/effect/proc_holder/spell/targeted/woundlick)
-	W.RemoveSpell(new /obj/effect/proc_holder/spell/invoked/shiftback)
+	if(antag)
+		antag.finish_form_change()
 	W.regenerate_icons()
 
-	to_chat(W, span_userdanger("I return to my facade."))
-	playsound(W.loc, pick('sound/combat/gib (1).ogg','sound/combat/gib (2).ogg'), 200, FALSE, 3)
-	W.spawn_gibs(FALSE)
-	W.Knockdown(30)
-	W.Stun(30)
+	// The player and stored body are restored before any potentially sleeping effects.
+	INVOKE_ASYNC(W, TYPE_PROC_REF(/mob/living/carbon/human, finish_werewolf_return), dead, gibbed)
+	for(var/obj/item/item in src)
+		dropItemToGround(item)
+	if(!QDELETED(src))
+		qdel(src)
 
-	qdel(src)
+/mob/living/carbon/human/proc/finish_werewolf_return(dead, gibbed)
+	if(dead)
+		death(gibbed)
+	to_chat(src, span_userdanger("I return to my facade."))
+	playsound(loc, pick('sound/combat/gib (1).ogg','sound/combat/gib (2).ogg'), 200, FALSE, 3)
+	spawn_gibs(FALSE)
+	Knockdown(1 SECONDS)
+
+/mob/living/carbon/human/species/werewolf/Destroy()
+	// Administrative deletion must not delete the player stored inside the beast.
+	if(stored_mob && mind?.current == src)
+		INVOKE_ASYNC(src, PROC_REF(werewolf_untransform), stat == DEAD)
+	return ..()

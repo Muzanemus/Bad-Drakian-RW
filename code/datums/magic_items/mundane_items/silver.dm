@@ -4,6 +4,18 @@
 	var/last_used
 
 /datum/magic_item/mundane/silver/on_hit(obj/item/source, atom/target, mob/user, proximity_flag, click_parameters)
+	if(isliving(target))
+		var/mob/living/creature = target
+		var/datum/antagonist/werewolf/wolf = creature.mind?.has_antag_datum(/datum/antagonist/werewolf)
+		if(wolf)
+			if(!wolf.transformed)
+				return
+			if(world.time < last_used + 5 SECONDS)
+				return
+			last_used = world.time
+			creature.adjustFireLoss(10)
+			creature.apply_status_effect(/datum/status_effect/debuff/werewolf_silver_bane)
+			return
 	if(world.time < src.last_used + 100)
 		return
 	. = ..()
@@ -15,6 +27,15 @@
 			H.adjust_fire_stacks(2, /datum/status_effect/fire_handler/fire_stacks/sunder)
 
 /datum/magic_item/mundane/silver/on_equip(obj/item/i, mob/living/user)
+	if(isliving(user))
+		var/mob/living/creature = user
+		var/datum/antagonist/werewolf/wolf = creature.mind?.has_antag_datum(/datum/antagonist/werewolf)
+		if(wolf)
+			if(!wolf.transformed)
+				return
+			creature.adjustFireLoss(25)
+			creature.apply_status_effect(/datum/status_effect/debuff/werewolf_silver_bane)
+			return
 	. = ..()
 	if(HAS_TRAIT(user, TRAIT_SILVER_WEAK) && !user.has_status_effect(STATUS_EFFECT_ANTIMAGIC))
 		var/datum/antagonist/vampire/V_lord = user.mind?.has_antag_datum(/datum/antagonist/vampire)
@@ -28,6 +49,15 @@
 		user.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/sunder)
 
 /datum/magic_item/mundane/silver/on_pickup(obj/item/i, mob/living/user)
+	if(isliving(user))
+		var/mob/living/creature = user
+		var/datum/antagonist/werewolf/wolf = creature.mind?.has_antag_datum(/datum/antagonist/werewolf)
+		if(wolf)
+			if(!wolf.transformed)
+				return
+			creature.adjustFireLoss(25)
+			creature.apply_status_effect(/datum/status_effect/debuff/werewolf_silver_bane)
+			return
 	var/mob/living/carbon/human/H = user
 	if(H.mind)
 		var/datum/antagonist/vampire/V_lord = H.mind.has_antag_datum(/datum/antagonist/vampire)

@@ -1,6 +1,8 @@
 /mob/living/carbon/human/species/werewolf
 	race = /datum/species/werewolf
 	footstep_type = FOOTSTEP_MOB_HEAVY
+	mob_can_parry = FALSE
+	mob_can_dodge = FALSE
 	var/datum/language_holder/stored_language
 	var/list/stored_skills
 	var/list/stored_experience
@@ -21,41 +23,11 @@
 	name = "verewolf"
 	id = "werewolf"
 	species_traits = list(NO_UNDERWEAR, NO_ORGAN_FEATURES, NO_BODYPART_FEATURES)
-	inherent_traits = list(
-		TRAIT_LONGSTRIDER,
-		TRAIT_IGNORESLOWDOWN,
-		TRAIT_IGNOREDAMAGESLOWDOWN,
-		TRAIT_STRONGKICK,
-		TRAIT_NOPAIN, 
-		TRAIT_NOPAINSTUN, 
-		TRAIT_CRITICAL_RESISTANCE, 
-		TRAIT_NOFALLDAMAGE1, 
-		TRAIT_KNEESTINGER_IMMUNITY, 
-		TRAIT_SHOCKIMMUNE,
-		TRAIT_SILVER_WEAK,
-		TRAIT_STRENGTH_UNCAPPED,
-		TRAIT_LONGSTRIDER,
-		TRAIT_SPELLCOCKBLOCK,
-		TRAIT_PIERCEIMMUNE,
-		TRAIT_HARDDISMEMBER,
-		TRAIT_NOSTINK,
-		TRAIT_NASTY_EATER,
-		TRAIT_ORGAN_EATER,
-		TRAIT_TOXIMMUNE,
-		TRAIT_BREADY,
-		TRAIT_STEELHEARTED,
-		TRAIT_BASHDOORS,
-		TRAIT_INFINITE_STAMINA,
-		TRAIT_ZJUMP,
-		TRAIT_NOSLEEP,
-		TRAIT_GRABIMMUNE,
-		TRAIT_STRONGBITE,
-		TRAIT_EXTREME_TEMPERATURE_IMMUNE,
-		TRAIT_UNLYCKERABLE //Literal archenemy
-	)
+	inherent_traits = list(TRAIT_INFINITE_STAMINA, TRAIT_RESISTCOLD, TRAIT_NODISMEMBER, TRAIT_STRONGBITE, TRAIT_ZJUMP, TRAIT_NOFALLDAMAGE1, TRAIT_BASHDOORS, TRAIT_STEELHEARTED, TRAIT_BREADY, TRAIT_ORGAN_EATER, TRAIT_NASTY_EATER, TRAIT_NOSTINK, TRAIT_CRITICAL_RESISTANCE, TRAIT_IGNORESLOWDOWN, TRAIT_HARDDISMEMBER, TRAIT_LONGSTRIDER, TRAIT_SILVER_WEAK)
+
 	changesource_flags = MIRROR_BADMIN | WABBAJACK | MIRROR_MAGIC | MIRROR_PRIDE | RACE_SWAP | SLIME_EXTRACT
 	inherent_biotypes = MOB_HUMANOID
-	armor = 30
+	armor = 0
 	no_equip = list(SLOT_SHIRT, SLOT_HEAD, SLOT_WEAR_MASK, SLOT_ARMOR, SLOT_GLOVES, SLOT_SHOES, SLOT_PANTS, SLOT_CLOAK, SLOT_BELT, SLOT_BACK_R, SLOT_BACK_L, SLOT_S_STORE)
 	nojumpsuit = 1
 	sexes = 1
@@ -104,6 +76,16 @@
 /datum/species/werewolf/on_species_gain(mob/living/carbon/C, datum/species/old_species)
 	. = ..()
 	RegisterSignal(C, COMSIG_MOB_SAY, PROC_REF(handle_speech))
+	var/mob/living/carbon/human/H = C
+	H.physiology.pain_mod *= 0.2
+	H.physiology.bleed_mod *= 0.6
+
+/datum/species/werewolf/on_species_loss(mob/living/carbon/C)
+	UnregisterSignal(C, COMSIG_MOB_SAY)
+	var/mob/living/carbon/human/H = C
+	H.physiology.pain_mod /= 0.2
+	H.physiology.bleed_mod /= 0.6
+	return ..()
 
 /datum/species/werewolf/update_damage_overlays(mob/living/carbon/human/H)
 	H.remove_overlay(DAMAGE_LAYER)

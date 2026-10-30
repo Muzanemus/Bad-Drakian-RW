@@ -13,13 +13,23 @@
 	var/transformed
 	var/transforming
 	var/untransforming
-	var/tf_stage = null
 	var/wolfname = "Verevolf"
-	var/automatically_untransforms_in_daytime = FALSE
-	var/ready_to_untransform = FALSE
+	var/is_moonkissed = FALSE
+	var/rage = 0
+	var/next_curse_tick = 0
+	var/form_change_ready_at = 0
+	var/last_seen_tod
+	var/nights_without_transformation = 0
+	var/transformed_since_last_nightfall = FALSE
+	var/forced_transformation_pending = FALSE
+	var/list/curse_spells = list()
+	var/list/beast_spells = list()
+	var/datum/weakref/active_body_ref
+	var/cleaning_curse = FALSE
 
 /datum/antagonist/werewolf/lesser
-	name = "Lesser Verevolf"
+	name = "Moonkissed"
+	is_moonkissed = TRUE
 	increase_votepwr = FALSE
 
 /datum/antagonist/werewolf/lesser/roundend_report()
@@ -36,15 +46,17 @@
 				return span_boldwarning("An Ancient Vampire. I must be careful!")
 
 /datum/antagonist/werewolf/on_gain()
+	last_seen_tod = GLOB.tod
 	greet()
 	owner.special_role = name
-	if(increase_votepwr)
-		forge_werewolf_objectives()
+	forge_werewolf_objectives()
 
 	wolfname = "[pick(GLOB.wolf_prefixes)] [pick(GLOB.wolf_suffixes)]"
+	grant_curse_powers()
 	return ..()
 
 /datum/antagonist/werewolf/on_removal()
+	cleanup_curse()
 	if(!silent && owner.current)
 		to_chat(owner.current,span_danger("I am no longer a [special_role]!"))
 	owner.special_role = null
@@ -68,11 +80,14 @@
 	return ..()
 
 /datum/antagonist/werewolf/lesser/greet()
-	// leave this empty so that lesser verevolf's dont get the greeting on bite.
-	// there is probably a better way to do this but this works until sm1 smarter inevitably rewrites WW.
+	to_chat(owner.current, span_userdanger("The mooncurse runs shallow. I am Moonkissed, bound to my pack."))
 
 /mob/living/carbon/human/proc/can_werewolf()
 	if(!mind)
+		return FALSE
+	if(ckey && is_banned_from(ckey, list(ROLE_SYNDICATE, ROLE_WEREWOLF)))
+		return FALSE
+	if(mind.has_antag_datum(/datum/antagonist/zombie))
 		return FALSE
 	if(mind.has_antag_datum(/datum/antagonist/vampire))
 		return FALSE
@@ -153,14 +168,14 @@
 		return
 	if(!werewolf_check())
 		return
-	to_chat(src, span_userdanger("The verevolf's curse takes root within me!"))
+	to_chat(src, span_userdanger("The mooncurse takes root within me. I am Moonkissed."))
 	to_chat(source, span_notice("[src] accepts the verevolf's curse."))
 	log_combat(source, src, "converted into a verevolf through a voluntary bite")
 
 /mob/living/carbon/human/proc/werewolf_feed(mob/living/carbon/human/target, healing_amount = 10)
 	if(!istype(target))
 		return
-	if(has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder) || has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/blessed))
+	if(has_status_effect(/datum/status_effect/debuff/werewolf_silver_bane) || has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder) || has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/blessed))
 		to_chat(src, span_notice("My power is weakened, I cannot heal!"))
 		return
 	if(target.mind)
@@ -178,23 +193,26 @@
 	return src.reagents.add_reagent(/datum/reagent/medicine/healthpot, healing_amount)
 
 /obj/item/clothing/suit/roguetown/armor/skin_armor/werewolf_skin
+	parent_type = /obj/item/clothing/suit/roguetown/armor/regenerating/skin
+	repair_time = 15 SECONDS
 	slot_flags = null
 	name = "verevolf's skin"
 	desc = ""
 	icon_state = null
 	body_parts_covered = FULL_BODY
 	body_parts_inherent = FULL_BODY
-	armor = ARMOR_WWOLF
+	armor = ARMOR_BRIGANDINE
 	prevent_crits = list(BCLASS_CUT, BCLASS_CHOP, BCLASS_STAB, BCLASS_BLUNT, BCLASS_TWIST)
 	blocksound = SOFTHIT
 	blade_dulling = DULLING_BASHCHOP
 	sewrepair = FALSE
-	max_integrity = 550
+	max_integrity = 300
 	item_flags = DROPDEL
 
 /obj/item/clothing/suit/roguetown/armor/skin_armor/werewolf_skin/Initialize(mapload)///makes blessed silver do extra damage
 	. = ..()
-	AddComponent(/datum/component/cursed_item, TRAIT_GRABIMMUNE, "HIDE", "#VOLFED")/// no one should ever see this unless they spawn in werewolf skin via the game panel. TRAIT_GRABIMMUNE is only on werewolves and the matyr during their super saiyan, should be fine.
+	if(ismob(loc))
+		RegisterSignal(loc, list(COMSIG_SPECIES_ATTACKED_BY, COMSIG_LIVING_ARMOR_CHECKED, COMSIG_MOB_APPLY_DAMGE), TYPE_PROC_REF(/obj/item/clothing/suit/roguetown/armor/regenerating, on_attacked_by), override = TRUE)
 
 /datum/intent/simple/werewolf
 	name = "claw"
@@ -203,7 +221,7 @@
 	attack_verb = list("claws", "mauls", "eviscerates")
 	animname = "chop"
 	hitsound = "genslash"
-	penfactor = 50
+	penfactor = 45
 	miss_text = "slashes the air!"
 	miss_sound = "bluntwooshlarge"
 	item_d_type = "slash"
@@ -225,10 +243,10 @@
 	icon = 'icons/roguetown/weapons/unarmed32.dmi'
 	max_blade_int = 900
 	max_integrity = 900
-	force = 25
+	force = 15
 	block_chance = 0
 	wdefense = 2
-	armor_penetration = 15
+	armor_penetration = 0
 	associated_skill = /datum/skill/combat/unarmed
 	wlength = WLENGTH_NORMAL
 	wbalance = WBALANCE_HEAVY
@@ -241,7 +259,7 @@
 	parrysound = list('sound/combat/parry/parrygen.ogg')
 	embedding = list("embedded_pain_multiplier" = 0, "embed_chance" = 0, "embedded_fall_chance" = 0)
 	item_flags = DROPDEL
-	special = /datum/special_intent/axe_swing	//Good pairing for area denial for WW's.
+	special = null
 
 /obj/item/rogueweapon/werewolf_claw/right
 	icon_state = "claw_r"
