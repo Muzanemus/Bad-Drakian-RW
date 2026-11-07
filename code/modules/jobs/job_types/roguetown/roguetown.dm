@@ -105,13 +105,23 @@
 	for(var/list_key in SStriumphs.post_equip_calls)
 		var/datum/triumph_buy/thing = SStriumphs.post_equip_calls[list_key]
 		thing.on_activate(H)
-	if(has_loadout && H.mind)
-		addtimer(CALLBACK(src, PROC_REF(choose_loadout), H), 50)
+	if(has_loadout && H.mind && !visualsOnly)
+		H.pending_outfit_loadouts++
+		addtimer(CALLBACK(src, PROC_REF(resolve_loadout), H), 5 SECONDS)
 	return
 
-/datum/outfit/job/roguetown/proc/choose_loadout(mob/living/carbon/human/H)
-	if(!has_loadout)
+/// Wait for the client, then track completion of the full outfit override.
+/datum/outfit/job/roguetown/proc/resolve_loadout(mob/living/carbon/human/H)
+	if(QDELETED(H))
 		return
 	if(!H.client)
-		addtimer(CALLBACK(src, PROC_REF(choose_loadout), H), 50)
+		addtimer(CALLBACK(src, PROC_REF(resolve_loadout), H), 5 SECONDS)
 		return
+	choose_loadout(H)
+	if(QDELETED(H))
+		return
+	H.pending_outfit_loadouts--
+	H.schedule_getting_started_reminder()
+
+/datum/outfit/job/roguetown/proc/choose_loadout(mob/living/carbon/human/H)
+	return

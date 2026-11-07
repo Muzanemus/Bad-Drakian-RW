@@ -44,7 +44,7 @@ GLOBAL_DATUM(recipe_wiki, /datum/recipe_wiki)
 	return GLOB.recipe_wiki
 
 /// Open the recipe viewer for a specific book's types. Used by physical recipe book items.
-/datum/recipe_wiki/proc/show_to_user(mob/user, list/type_filter, title = "Recipe Book", book_type_path)
+/datum/recipe_wiki/proc/show_to_user(mob/user, list/type_filter, title = "Recipe Book", book_type_path, entry_type_path)
 	if(!user?.client)
 		return
 	var/ckey = user.client.ckey
@@ -57,6 +57,8 @@ GLOBAL_DATUM(recipe_wiki, /datum/recipe_wiki)
 	state["title"] = title
 	state["page"] = "book"
 	state["book_path"] = book_type_path ? "[book_type_path]" : null
+	if(entry_type_path)
+		select_recipe(state, "[entry_type_path]")
 	ui_interact(user)
 
 /// Open the OOC wiki library landing page.
@@ -271,20 +273,35 @@ GLOBAL_DATUM(recipe_wiki, /datum/recipe_wiki)
 	var/datum/recipe_wiki/wiki = get_recipe_wiki()
 	wiki.show_library(mob)
 
-/// Direct chat link to Chapter I, without changing the normal Encyclopedia verb.
+/// Open the first page of Getting Started from the chat reminder.
 /client/verb/getting_started_guide()
 	set name = "Getting-Started"
 	set category = "OOC"
 	set hidden = TRUE
 
 	var/datum/recipe_wiki/wiki = get_recipe_wiki()
-	wiki.show_to_user(mob, list(/datum/book_entry/getting_started), "Getting Started", /obj/item/recipe_book/getting_started)
+	wiki.show_to_user(
+		mob,
+		list(/datum/book_entry/getting_started),
+		"Getting Started",
+		/obj/item/recipe_book/getting_started,
+		/datum/book_entry/getting_started/character,
+	)
 
 /mob/living/carbon/human
 	var/getting_started_reminder_scheduled = FALSE
+	var/getting_started_setup_finished = FALSE
+	/// Outfit loadout choices can finish independently of character setup.
+	var/pending_outfit_loadouts = 0
 
-/// Called after setup returns, so outfit/loadout prompts finish before the delay begins.
+/mob/living/carbon/human/proc/finish_getting_started_setup()
+	getting_started_setup_finished = TRUE
+	schedule_getting_started_reminder()
+
+/// Start the delay once both character setup and deferred outfit choices are done.
 /mob/living/carbon/human/proc/schedule_getting_started_reminder()
+	if(!getting_started_setup_finished || pending_outfit_loadouts)
+		return
 	if(getting_started_reminder_scheduled || !client || advsetup || stat == DEAD)
 		return
 	if(get_playerquality(client.ckey) > 5)

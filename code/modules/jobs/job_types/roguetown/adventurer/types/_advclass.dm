@@ -150,7 +150,7 @@
 			addtimer(CALLBACK(H, TYPE_PROC_REF(/mob/living/carbon/human, announce_slave_latejoin)), 0)
 
 	if(!dummy)
-		H.schedule_getting_started_reminder()
+		H.finish_getting_started_setup()
 
 /datum/advclass/proc/post_equip(mob/living/carbon/human/H)
 	addtimer(CALLBACK(H,TYPE_PROC_REF(/mob/living/carbon/human, add_credit), TRUE), 20)
