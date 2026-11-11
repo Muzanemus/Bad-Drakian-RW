@@ -63,6 +63,8 @@
 	var/atom/middragatom
 	var/tcompare
 	var/charging = 0
+	/// Blocks BYOND's middle-click event for an interrupted spell until the next press.
+	var/spell_channel_interrupted = FALSE
 	var/chargedprog = 0
 	var/sections
 	var/lastplayed
@@ -162,6 +164,7 @@
 		charge_was_blocked_by_cooldown = TRUE
 		return
 
+	spell_channel_interrupted = FALSE
 	mob.atkswinging = "middle"
 	if(mob.mmb_intent)
 		mob.used_intent = mob.mmb_intent

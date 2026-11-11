@@ -605,6 +605,13 @@
 			armorlist[x] = 0
 	var/mob/living/carbon/human/wearer = loc
 	if(istype(wearer))
+		if(!obj_broken && wearer.client?.charging && wearer.atkswinging == "middle" && istype(wearer.mmb_intent, INTENT_SPELL))
+			var/physical_protection = max(armor.blunt, armor.slash, armor.stab, armor.piercing, armor.bullet)
+			if(body_parts_covered_dynamic && physical_protection > 0 && (src in wearer.get_equipped_items(include_beltslots = FALSE)))
+				wearer.client.spell_channel_interrupted = TRUE
+				wearer.client.progress = 0
+				wearer.stop_attack()
+				to_chat(wearer, span_warning("My [name] broke and I lost my concentration!"))
 		if(HAS_TRAIT(wearer, TRAIT_LOOSE_STRAPS) && !HAS_TRAIT(src, TRAIT_NODROP))
 			wearer.visible_message(span_danger("[src] gets flung off!"))
 			get_flung_off_forced()

@@ -104,6 +104,8 @@
 */
 /mob/proc/ClickOn( atom/A, params )
 	var/list/modifiers = params2list(params)
+	if(modifiers["middle"] && client?.spell_channel_interrupted)
+		return
 
 	if(curplaying)
 		curplaying.on_mouse_up()
