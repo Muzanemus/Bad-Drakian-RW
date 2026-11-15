@@ -15,7 +15,7 @@ GLOBAL_VAR_INIT(year_integer, text2num(year)) // = 2013???
 		H.open_language_menu(usr)
 
 	if(href_list["task"] == "view_headshot")
-		if(!ismob(usr))
+		if(!ismob(usr) || !can_show_examine_profile())
 			return
 		var/datum/examine_panel/mob_examine_panel = new(src)
 		mob_examine_panel.holder = src
@@ -508,7 +508,7 @@ GLOBAL_VAR_INIT(year_integer, text2num(year)) // = 2013???
 		return
 
 	if(href_list["task"] == "view_rumours_gossip")
-		if(!ismob(usr))
+		if(!ismob(usr) || !can_show_examine_profile())
 			return
 		var/msg = ""
 		if(rumour && length(rumour))

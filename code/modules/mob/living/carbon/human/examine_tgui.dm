@@ -23,6 +23,11 @@
 	qdel(examine_panel_screen)
 	return ..()
 
+/datum/examine_panel/ui_status(mob/user, datum/ui_state/state)
+	if(!length(previewing) && holder && !holder.can_show_examine_profile())
+		return UI_CLOSE
+	return ..()
+
 /datum/examine_panel/ui_state(mob/user)
 	return GLOB.always_state
 

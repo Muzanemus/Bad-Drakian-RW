@@ -155,6 +155,7 @@ GLOBAL_LIST_EMPTY(chosen_names)
 	var/skillcap_notifs = TRUE
 	var/restricted_species_pref = null
 	var/wildshape_name = TRUE
+	var/show_werewolf_examine = FALSE
 	var/xenophobe_pref = 0
 
 	var/list/custom_names = list()
@@ -612,6 +613,7 @@ GLOBAL_LIST_EMPTY(chosen_names)
 		"top_examine",
 		"voting_popup",
 		"wildshape_name",
+		"show_werewolf_examine",
 	)
 	for(var/setting as anything in boolean_settings)
 		if(!!vars[setting] != !!initial(vars[setting]))

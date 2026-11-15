@@ -74,6 +74,10 @@
 	var/mark_tooltip = "<font color='[COLOR_HERESYSEVERITY_SUSPICIOUS]'><b>HERETICAL: IT BEARS THE MARK OF BAOTHA.</b></font><br>A supernatural brand associated with Baotha's fertility blessing. Its presence does not reveal whether the bearer accepted it willingly."
 	return span_info("[p_they(TRUE)] [p_have()] a [SPAN_TOOLTIP_DANGEROUS_HTML(mark_tooltip, mark_label)] adorning [p_their()] lower abdomen.")
 
+/// Werewolf forms require their player's opt-in to expose the character's profile.
+/mob/living/carbon/human/proc/can_show_examine_profile()
+	return !istype(src, /mob/living/carbon/human/species/werewolf) || client?.prefs?.show_werewolf_examine
+
 /mob/living/carbon/human/examine(mob/user)
 	. = list()
 	var/observer_privilege = isobserver(user)
@@ -970,7 +974,7 @@
 			if(!(mobility_flags & MOBILITY_STAND) && user != src && (user.zone_selected == BODY_ZONE_CHEST))
 				. += "<a href='?src=[REF(src)];check_hb=1'>Listen to Heartbeat</a>"
 
-	if((!obscure_name || client?.prefs.masked_examine) && (flavortext || headshot_link || ooc_notes || nsfwflavortext || erpprefs))
+	if(can_show_examine_profile() && (!obscure_name || client?.prefs.masked_examine) && (flavortext || headshot_link || ooc_notes || nsfwflavortext || erpprefs))
 		. += "<a href='?src=[REF(src)];task=view_headshot;'>Examine closer</a>"
 
 	if(ishuman(user))
@@ -979,7 +983,7 @@
 			. += "<a href='?src=[REF(src)];task=assess;'>Assess</a>"
 
 	/// Rumours & Gossip
-	if(length(rumour) || length(noble_gossip))
+	if(can_show_examine_profile() && (length(rumour) || length(noble_gossip)))
 		if(!obscure_name || (obscure_name && client?.prefs.masked_examine) || observer_privilege)
 			. += "<a href='?src=[REF(src)];task=view_rumours_gossip;'>Recall Rumours & Gossip</a>"
 
@@ -989,10 +993,10 @@
 	. = list()
 	if(!user.client?.prefs?.top_examine)
 		. += "ø ------------ ø"
-		if ((valid_headshot_link(src, headshot_link, TRUE)) && (user.client?.prefs.chatheadshot) && (!obscure_name || client?.prefs.masked_examine))
+		if (can_show_examine_profile() && (valid_headshot_link(src, headshot_link, TRUE)) && (user.client?.prefs.chatheadshot) && (!obscure_name || client?.prefs.masked_examine))
 			. += "[chat_headshot(headshot_link)]"
 	else
-		if ((valid_headshot_link(src, headshot_link, TRUE)) && (user.client?.prefs.chatheadshot) && (!obscure_name || client?.prefs.masked_examine))
+		if (can_show_examine_profile() && (valid_headshot_link(src, headshot_link, TRUE)) && (user.client?.prefs.chatheadshot) && (!obscure_name || client?.prefs.masked_examine))
 			. += "[chat_headshot(headshot_link)]\nø ------------ ø"
 		else
 			. += "ø ------------ ø"

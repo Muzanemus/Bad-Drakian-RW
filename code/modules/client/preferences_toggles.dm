@@ -104,6 +104,7 @@
 		list("id" = "masked_examine", "label" = "Masked Examine", "enabled" = !!owner.prefs.masked_examine, "desc" = "Allow your character info to be seen while masked."),
 		list("id" = "top_examine", "label" = "Examine Info At Top", "enabled" = !!owner.prefs.top_examine, "desc" = "Show the headshot, name, and other main examine info at the top of the examine block instead of the bottom."),
 		list("id" = "wildshape_name", "label" = "Show Wildshape Name", "enabled" = !!owner.prefs.wildshape_name, "desc" = "Show your character name while in wildshape."),
+		list("id" = "show_werewolf_examine", "label" = "Show Werewolf Examine", "enabled" = !!owner.prefs.show_werewolf_examine, "desc" = "Let others see your character profile while you are in werewolf form."),
 		list("id" = "nsfw_examine", "label" = "Always Show NSFW Examine", "enabled" = !!owner.prefs.nsfw_examine_always, "desc" = "Always display NSFW examine info, even when clothed."),
 	)
 
@@ -211,6 +212,8 @@
 				owner.toggle_examine_blocks()
 			if("wildshape_name")
 				owner.toggle_wildshape_name()
+			if("show_werewolf_examine")
+				owner.toggle_werewolf_examine()
 			if("language_fonts")
 				owner.toggle_language_fonts()
 			if("language_icon")
@@ -800,6 +803,18 @@
 			to_chat(src, "You will show your character's name when wildshaping as a Druid.")
 		else
 			to_chat(src, "You will hide your character's name when wildshaping as a Druid and appear solely as your animal form.")
+
+/client/verb/toggle_werewolf_examine()
+	set category = "Options"
+	set name = "Toggle Werewolf Examine"
+	set hidden = 1
+	if(prefs)
+		prefs.show_werewolf_examine = !prefs.show_werewolf_examine
+		prefs.save_preferences()
+		if(prefs.show_werewolf_examine)
+			to_chat(src, "Your character profile will be visible in werewolf form.")
+		else
+			to_chat(src, "Your character profile will be hidden in werewolf form.")
 
 /client/verb/toggle_autopunctuation()
 	set category = "Options"
