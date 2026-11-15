@@ -22,6 +22,8 @@
 #define TRAIT_DISGRACED_NOBLE "Formerly Noble Blooded"
 #define TRAIT_ASSASSIN_TARGET "Marked for Death"
 #define TRAIT_GNOLL_HUNTED "Marked by Gnolls"
+#define TRAIT_RAPEBAIT "Rapebait"
+#define TRAIT_RAPIST "Rapist"
 #define TRAIT_EMPATH "Empath"
 #define TRAIT_EXPLOSIVE_SUPPLY "Explosive Supply"
 #define TRAIT_DRUG_SUPPLY "Drug Supply"

@@ -130,6 +130,9 @@
 		if(H.dna?.species?.type == /datum/species/gnoll)
 			. += span_cultsmall("Graggar has marked them!")
 
+	if(user != src && HAS_TRAIT(user, TRAIT_RAPIST) && HAS_TRAIT(src, TRAIT_RAPEBAIT))
+		. += span_notice("You recognize them as rapebait.")
+
 	if(user != src && HAS_TRAIT(user, TRAIT_MATTHIOS_EYES) && (!HAS_TRAIT(src, TRAIT_DECEIVING_MEEKNESS)))
 		var/atom/item = get_most_expensive()
 		if(item)
