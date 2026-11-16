@@ -518,7 +518,6 @@ GLOBAL_LIST_EMPTY(reach_dummy_pool)
 				dummy = new /obj()
 				dummy.pass_flags |= PASSTABLE
 				dummy.invisibility = INVISIBILITY_ABSTRACT
-				// Keep the reach probe on the same Z-level while it checks collisions.
 				dummy.movement_type = FLYING
 			dummy.forceMove(get_turf(here))
 			for(var/i in 1 to reach) //Limit it to that many tries
