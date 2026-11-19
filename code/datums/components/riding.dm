@@ -336,6 +336,9 @@
 /datum/component/riding/human/vehicle_mob_buckle(datum/source, mob/living/M, force = FALSE)
 	. = ..()
 	var/mob/living/carbon/human/H = parent
+	// Tiny passengers are light enough for a larger carrier regardless of strength.
+	if(HAS_TRAIT(M, TRAIT_TINY) && !HAS_TRAIT(H, TRAIT_TINY))
+		return
 	var/amt2use = HUMAN_CARRY_SLOWDOWN
 	var/reqstrength = HAS_TRAIT(H, TRAIT_PONYGIRL_RIDEABLE) ? 0 : 10
 	if(H.r_grab && H.l_grab)
