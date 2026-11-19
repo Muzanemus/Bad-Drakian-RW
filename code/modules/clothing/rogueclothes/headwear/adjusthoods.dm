@@ -13,6 +13,7 @@
 	body_parts_covered = NECK|HAIR|EARS|HEAD
 	flags_inv = HIDEEARS|HIDEFACE|HIDEHAIR|HIDEFACIALHAIR
 	slot_flags = ITEM_SLOT_HEAD|ITEM_SLOT_MASK
+	mask_override = TRUE // Raised hoods conceal the face in either wearable slot.
 	sleevetype = null
 	sleeved = null
 	dynamic_hair_suffix = ""
