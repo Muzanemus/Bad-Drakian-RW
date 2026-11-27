@@ -108,8 +108,9 @@
 
 	if(force > SEX_FORCE_MID) // if using force above default
 		if(force >= SEX_FORCE_EXTREME) // damage if set to max force
-			var/damage = bottom_knotted_part&SEX_PART_JAWS ? 10 : 30 // base damage value
-			var/body_zone = bottom_knotted_part&SEX_PART_JAWS ? BODY_ZONE_HEAD : BODY_ZONE_CHEST
+			var/head_knot = bottom_knotted_part & (SEX_PART_JAWS | SEX_PART_EARS)
+			var/damage = head_knot ? 10 : 30
+			var/body_zone = head_knot ? BODY_ZONE_HEAD : BODY_ZONE_CHEST
 			var/obj/item/bodypart/affecting = btm.get_bodypart(body_zone)
 			if(affecting && affecting.brute_dam < 150-damage) // cap damage applied
 				// Original call retained for rollback; include attachment damage in the quirk resistance.
@@ -127,15 +128,17 @@
 		var/knot_word_tie = user.sexcon.get_knot_synonym()
 		user.visible_message(span_notice("[user] ties their [knot_word_tie] inside of [btm]!"), span_notice("I tie my [knot_word_tie] inside of [btm]."))
 	if(btm.stat != DEAD)
-		switch(btm.sexcon.knotted_part) // this is not a smart way to do this in hindsight, but it is fast at least
-			if(SEX_PART_CUNT,SEX_PART_ANUS,SEX_PART_JAWS,SEX_PART_SLIT_SHEATH)
+		switch(BitCount(btm.sexcon.knotted_part & ALL_KNOTTABLE_SEX_PARTS))
+			if(1)
 				to_chat(btm, btm_forced ? span_userdanger("You forced their knot inside yourself!") : span_userdanger("You have been knotted!"))
-			if(SEX_PART_CUNT|SEX_PART_ANUS|SEX_PART_JAWS|SEX_PART_SLIT_SHEATH)
-				to_chat(btm, span_userdanger("You have been quad-knotted!"))
-			if(SEX_PART_CUNT|SEX_PART_ANUS,SEX_PART_CUNT|SEX_PART_JAWS,SEX_PART_CUNT|SEX_PART_SLIT_SHEATH,SEX_PART_ANUS|SEX_PART_SLIT_SHEATH,SEX_PART_ANUS|SEX_PART_JAWS,SEX_PART_JAWS|SEX_PART_SLIT_SHEATH)
+			if(2)
 				to_chat(btm, span_userdanger("You have been double-knotted!"))
-			else
+			if(3)
 				to_chat(btm, span_userdanger("You have been triple-knotted!"))
+			if(4)
+				to_chat(btm, span_userdanger("You have been quad-knotted!"))
+			if(5)
+				to_chat(btm, span_userdanger("You have been quintuple-knotted!"))
 		if(we_got_baothad)
 			to_chat(btm, span_userdanger("Baothan magick infuses within, you can't think straight!"))
 	if(!btm.has_status_effect(/datum/status_effect/knot_tied)) // only apply status if we don't have it already
@@ -391,15 +394,17 @@
 		knot_exit(keep_top_status, keep_btm_status)
 		return
 	if(ishuman(btm) && !QDELETED(btm) && ishuman(top) && !QDELETED(top))
+		var/knot_part = top_sexcon.knotted_part_partner
 		if(forceful_removal)
-			var/damage = top.sexcon.knotted_part_partner&SEX_PART_JAWS ? 10 : 30 // base damage value
+			var/head_knot = knot_part & (SEX_PART_JAWS | SEX_PART_EARS)
+			var/damage = head_knot ? 10 : 30
 			if (top.sexcon.arousal > MAX_AROUSAL / 4 || top.sexcon.manual_arousal > SEX_MANUAL_AROUSAL_PARTIAL) // considered still hard, let it rip like a beyblade
 				damage *= 2
 				btm.Knockdown(10)
-				if(notify && !keep_btm_status && !btm.has_status_effect(/datum/status_effect/knot_gaped)) // apply gaped status if extra forceful pull (only if we're not reknotting target)
+				if(notify && !keep_btm_status && !(knot_part & SEX_PART_EARS) && !btm.has_status_effect(/datum/status_effect/knot_gaped)) // apply gaped status if extra forceful pull (only if we're not reknotting target)
 					btm.apply_status_effect(/datum/status_effect/knot_gaped)
 			if(top.sexcon.force >= SEX_FORCE_EXTREME) // only apply damage if top force is set to max
-				var/body_zone = top.sexcon.knotted_part_partner&SEX_PART_JAWS ? BODY_ZONE_HEAD : BODY_ZONE_CHEST
+				var/body_zone = head_knot ? BODY_ZONE_HEAD : BODY_ZONE_CHEST
 				var/obj/item/bodypart/affecting = btm.get_bodypart(body_zone)
 				if(affecting && affecting.brute_dam < 150-damage) // cap damage applied
 					// Original call retained for rollback; include attachment damage in the quirk resistance.
@@ -429,8 +434,8 @@
 			btm.sexcon.try_do_pain_effect(PAIN_MILD_EFFECT, FALSE)
 		add_cum_floor(get_turf(btm))
 		// The climax already delivered the load. For an internal knot, only start the deferred leakage.
-		var/knot_orifice = top_sexcon.knotted_part_partner & (SEX_PART_CUNT|SEX_PART_ANUS|SEX_PART_SLIT_SHEATH)
-		if(knot_orifice)
+		var/knot_orifice = knot_part & (SEX_PART_CUNT | SEX_PART_ANUS | SEX_PART_SLIT_SHEATH | SEX_PART_EARS)
+		if(knot_orifice & ~SEX_PART_EARS)
 			if(top?.dna?.species?.id == "gnoll")
 				btm.has_gnoll_scent_this_round = TRUE
 			var/top_redolent = HAS_TRAIT(top, TRAIT_REDOLENT)
@@ -439,6 +444,7 @@
 				top.redolent_apply_contact_stink(btm)
 			else if(bottom_redolent && !top_redolent)
 				btm.redolent_apply_contact_stink(top)
+		if(knot_orifice)
 			apply_creampie_drip(btm, knot_orifice, use_long = top_sexcon.get_production_testicle_size() > DEFAULT_TESTICLES_SIZE, added_duration = top_sexcon.get_leakage_duration())
 	knot_exit(keep_top_status, keep_btm_status)
 
