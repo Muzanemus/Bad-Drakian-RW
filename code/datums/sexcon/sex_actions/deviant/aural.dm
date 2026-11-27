@@ -52,7 +52,7 @@
 		target.set_blurriness(blurriness)
 
 	if(ringing_volume && world.time >= target.mob_timers["aural_ringing"])
-		target.mob_timers["aurual_ringing"] = world.time + 10 SECONDS
+		target.mob_timers["aural_ringing"] = world.time + 10 SECONDS
 		target.playsound_local(target, 'sound/combat/bombard/flash_ring.ogg', ringing_volume, FALSE)
 
 /datum/sex_action/aural/on_perform(mob/living/carbon/human/user, mob/living/carbon/human/target)
