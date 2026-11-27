@@ -6,6 +6,8 @@
 #define SEX_ZONE_MOUTH				(1<<4)
 #define SEX_ZONE_CHEST				(1<<5)
 #define SEX_ZONE_CHEST_GRAB			(1<<6)
+#define SEX_ZONE_EARS				(1<<7)
+#define SEX_ZONE_EARS_GRAB			(1<<8)
 #define SEX_SUBTLE_MESSAGE_REPEAT_INTERVAL	3
 
 //Used to prevent sexcon messages repeating unless in subtle or through changes in intensity, speed, knot status or subtle usage. Also used for filtering sexcon messages that might be prefbreaking (i.e. chastity, gore stuff, etc.)
@@ -279,6 +281,10 @@
 		access_zone_bitfield |= SEX_ZONE_CHEST
 	if(get_location_accessible(user, BODY_ZONE_CHEST, grabs = TRUE, skipundies = TRUE))
 		access_zone_bitfield |= SEX_ZONE_CHEST_GRAB
+	if(get_location_accessible(user, BODY_ZONE_PRECISE_EARS, grabs = FALSE, skipundies = TRUE))
+		access_zone_bitfield |= SEX_ZONE_EARS
+	if(get_location_accessible(user, BODY_ZONE_PRECISE_EARS, grabs = TRUE, skipundies = TRUE))
+		access_zone_bitfield |= SEX_ZONE_EARS_GRAB
 
 // only check active accessible body zones
 /datum/sex_controller/proc/update_current_accessible_body_zones(body_zone, grabs)
@@ -304,6 +310,10 @@
 					access_zone_bitfield &= ~SEX_ZONE_CHEST_GRAB
 			else if((access_zone_bitfield&SEX_ZONE_CHEST) && !get_location_accessible(user, BODY_ZONE_CHEST, grabs = FALSE, skipundies = TRUE))
 				access_zone_bitfield &= ~SEX_ZONE_CHEST
+		if(BODY_ZONE_PRECISE_EARS)
+			var/ear_zone_flag = grabs ? SEX_ZONE_EARS_GRAB : SEX_ZONE_EARS
+			if((access_zone_bitfield & ear_zone_flag) && !get_location_accessible(user, BODY_ZONE_PRECISE_EARS, grabs = grabs, skipundies = TRUE))
+				access_zone_bitfield &= ~ear_zone_flag
 		else
 			// hey YOU, add the new targeted zone to SEX_ZONE bitfield, and update update_all_accessible_body_zones()/get_accessible_body_zone()
 			CRASH("sex_action: attempt to access non-existent bitfield for var body_zone_bitfield [body_zone]")
@@ -324,6 +334,9 @@
 			if(grabs)
 				return (body_zone_bitfield&SEX_ZONE_CHEST_GRAB) != SEX_ZONE_NULL
 			return (body_zone_bitfield&SEX_ZONE_CHEST) != SEX_ZONE_NULL
+		if(BODY_ZONE_PRECISE_EARS)
+			var/ear_zone_flag = grabs ? SEX_ZONE_EARS_GRAB : SEX_ZONE_EARS
+			return (body_zone_bitfield & ear_zone_flag) != SEX_ZONE_NULL
 	// hey YOU, add the new targeted zone to SEX_ZONE bitfield, and update update_all_accessible_body_zones()/update_current_accessible_body_zones()
 	CRASH("sex_action: attempt to access non-existent bitfield for var body_zone_bitfield [body_zone]")
 
@@ -2589,6 +2602,8 @@ GLOBAL_LIST_EMPTY(panel_triumph_received)
 #undef SEX_ZONE_MOUTH
 #undef SEX_ZONE_CHEST
 #undef SEX_ZONE_CHEST_GRAB
+#undef SEX_ZONE_EARS
+#undef SEX_ZONE_EARS_GRAB
 
 /datum/sex_controller/proc/get_tailmaw_fluid()
 	var/obj/item/organ/tail/manticore/tail = get_manticore_tail(user)
