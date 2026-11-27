@@ -15,13 +15,11 @@
 	return TRUE
 
 /datum/sex_action/aural/can_perform(mob/living/carbon/human/user, mob/living/carbon/human/target)
-	if(user == target)
+	if(!user.getorganslot(ORGAN_SLOT_PENIS) || !target.getorganslot(ORGAN_SLOT_EARS))
 		return FALSE
-	if(!check_location_accessible(user, user, BODY_ZONE_PRECISE_GROIN, TRUE, TRUE))
+	if(!..())
 		return FALSE
-	if(!check_location_accessible(user, target, BODY_ZONE_PRECISE_EARS, TRUE, TRUE))
-		return FALSE
-	return TRUE
+	return check_location_accessible(user, target, BODY_ZONE_PRECISE_EARS, grabs = TRUE)
 
 /datum/sex_action/aural/on_start(mob/living/carbon/human/user, mob/living/carbon/human/target)
 	user.visible_message(span_warning("[user] shoves [user.p_their()] cock into [target]'s ear!"))
