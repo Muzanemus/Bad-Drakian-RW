@@ -55,7 +55,7 @@
 		target.mob_timers["aural_ringing"] = world.time + 10 SECONDS
 		target.playsound_local(target, 'sound/combat/bombard/flash_ring.ogg', ringing_volume, FALSE)
 
-/datum/sex_action/aural/on_perform(mob/living/carbon/human/user, mob/living/carbon/human/target)
+/datum/sex_action/aural/on_perform(mob/living/carbon/human/user, mob/living/carbon/human/target, datum/callback/still_active)
 	apply_force_effects(target, user.sexcon.force)
 	if(!user.sexcon.do_knot_action)
 		user.sexcon_action_message(user.sexcon.spanify_force("[user] [user.sexcon.get_generic_force_adjective()] fucks [target]'s ear."))
@@ -76,6 +76,8 @@
 		for(var/i = 1; i <= user.sexcon.get_load_bursts(); i++)
 			user.sexcon.cum_into(splashed_user = target, orifice = SEX_PART_EARS, consume_charge = i == 1 ? TRUE : FALSE)
 			sleep(10)
+			if(still_active && !still_active.Invoke())
+				return
 		if(!target.has_status_effect(/datum/status_effect/knot_fucked_stupid))
 			target.apply_status_effect(/datum/status_effect/knot_fucked_stupid)
 
